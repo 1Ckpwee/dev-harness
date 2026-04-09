@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# uninstall.sh — Remove dev-harness from this machine
+# uninstall.sh — Remove duo-dev from this machine
 # Usage: ./uninstall.sh
-#        harness uninstall
+#        duo uninstall
 
 set -euo pipefail
 
@@ -11,14 +11,14 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m'
 
-HARNESS_HOME="${HOME}/.dev-harness"
+DUO_HOME="${HOME}/.duo-dev"
 BIN_DIR="${HOME}/.local/bin"
 
-echo -e "${BLUE}=== Uninstalling Dev Harness ===${NC}"
+echo -e "${BLUE}=== Uninstalling Duo Dev ===${NC}"
 echo ""
 
 # Confirm
-read -p "This will remove dev-harness CLI and global config. Continue? [y/N] " -n 1 -r
+read -p "This will remove duo-dev CLI and global config. Continue? [y/N] " -n 1 -r
 echo
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     echo "Aborted."
@@ -26,27 +26,25 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
 fi
 
 # Remove CLI symlink
-if [[ -L "${BIN_DIR}/harness" ]]; then
-    rm "${BIN_DIR}/harness"
+if [[ -L "${BIN_DIR}/duo" ]]; then
+    rm "${BIN_DIR}/duo"
     echo -e "${GREEN}Removed CLI symlink${NC}"
 fi
 
-# Remove harness home directory
-if [[ -d "$HARNESS_HOME" ]]; then
-    rm -rf "$HARNESS_HOME"
-    echo -e "${GREEN}Removed ${HARNESS_HOME}${NC}"
+# Remove duo-dev home directory
+if [[ -d "$DUO_HOME" ]]; then
+    rm -rf "$DUO_HOME"
+    echo -e "${GREEN}Removed ${DUO_HOME}${NC}"
 fi
 
 # Clean Claude Code config
 CLAUDE_MD="${HOME}/.claude/CLAUDE.md"
-if [[ -f "$CLAUDE_MD" ]] && grep -q "Dev Harness" "$CLAUDE_MD" 2>/dev/null; then
-    # Remove the Dev Harness section (from "## Dev Harness" to the next "##" or EOF)
+if [[ -f "$CLAUDE_MD" ]] && grep -q "Duo Dev" "$CLAUDE_MD" 2>/dev/null; then
     if [[ "$OSTYPE" == "darwin"* ]]; then
-        sed -i '' '/^## Dev Harness Workflow$/,/^## [^D]/{/^## [^D]/!d;}' "$CLAUDE_MD"
-        # Also remove trailing blank lines left behind
+        sed -i '' '/^## Duo Dev Workflow$/,/^## [^D]/{/^## [^D]/!d;}' "$CLAUDE_MD"
         sed -i '' -e :a -e '/^\n*$/{$d;N;ba' -e '}' "$CLAUDE_MD"
     else
-        sed -i '/^## Dev Harness Workflow$/,/^## [^D]/{/^## [^D]/!d;}' "$CLAUDE_MD"
+        sed -i '/^## Duo Dev Workflow$/,/^## [^D]/{/^## [^D]/!d;}' "$CLAUDE_MD"
         sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' "$CLAUDE_MD"
     fi
     echo -e "${GREEN}Cleaned Claude Code config${NC}"
@@ -54,19 +52,19 @@ fi
 
 # Clean Codex config
 CODEX_AGENTS="${HOME}/.codex/AGENTS.md"
-if [[ -f "$CODEX_AGENTS" ]] && grep -q "Dev Harness" "$CODEX_AGENTS" 2>/dev/null; then
+if [[ -f "$CODEX_AGENTS" ]] && grep -q "Duo Dev" "$CODEX_AGENTS" 2>/dev/null; then
     if [[ "$OSTYPE" == "darwin"* ]]; then
-        sed -i '' '/^## Dev Harness Workflow$/,/^## [^D]/{/^## [^D]/!d;}' "$CODEX_AGENTS"
+        sed -i '' '/^## Duo Dev Workflow$/,/^## [^D]/{/^## [^D]/!d;}' "$CODEX_AGENTS"
         sed -i '' -e :a -e '/^\n*$/{$d;N;ba' -e '}' "$CODEX_AGENTS"
     else
-        sed -i '/^## Dev Harness Workflow$/,/^## [^D]/{/^## [^D]/!d;}' "$CODEX_AGENTS"
+        sed -i '/^## Duo Dev Workflow$/,/^## [^D]/{/^## [^D]/!d;}' "$CODEX_AGENTS"
         sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' "$CODEX_AGENTS"
     fi
     echo -e "${GREEN}Cleaned Codex config${NC}"
 fi
 
 # Remove Cursor rule
-CURSOR_RULE="${HOME}/.cursor/rules/dev-harness.mdc"
+CURSOR_RULE="${HOME}/.cursor/rules/duo-dev.mdc"
 if [[ -f "$CURSOR_RULE" ]]; then
     rm "$CURSOR_RULE"
     echo -e "${GREEN}Removed Cursor rule${NC}"
@@ -74,11 +72,11 @@ fi
 
 # Clean global gitignore
 GLOBAL_GITIGNORE="${HOME}/.config/git/ignore"
-if [[ -f "$GLOBAL_GITIGNORE" ]] && grep -q '\.harness/' "$GLOBAL_GITIGNORE" 2>/dev/null; then
+if [[ -f "$GLOBAL_GITIGNORE" ]] && grep -q '\.duo/' "$GLOBAL_GITIGNORE" 2>/dev/null; then
     if [[ "$OSTYPE" == "darwin"* ]]; then
-        sed -i '' '/# Dev Harness/d;/\.harness\//d' "$GLOBAL_GITIGNORE"
+        sed -i '' '/# Duo Dev/d;/\.duo\//d' "$GLOBAL_GITIGNORE"
     else
-        sed -i '/# Dev Harness/d;/\.harness\//d' "$GLOBAL_GITIGNORE"
+        sed -i '/# Duo Dev/d;/\.duo\//d' "$GLOBAL_GITIGNORE"
     fi
     echo -e "${GREEN}Cleaned global gitignore${NC}"
 fi
@@ -86,5 +84,5 @@ fi
 echo ""
 echo -e "${BLUE}=== Uninstall Complete ===${NC}"
 echo ""
-echo -e "${YELLOW}Note:${NC} Per-project .harness/ directories were NOT removed."
-echo "To remove them manually: rm -rf /path/to/project/.harness/"
+echo -e "${YELLOW}Note:${NC} Per-project .duo/ directories were NOT removed."
+echo "To remove them manually: rm -rf /path/to/project/.duo/"

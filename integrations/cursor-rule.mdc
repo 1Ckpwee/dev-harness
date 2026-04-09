@@ -1,29 +1,29 @@
 ---
-description: Dual-agent dev harness workflow — Builder role for Cursor
+description: Dual-agent duo-dev workflow — Builder role for Cursor
 globs:
 alwaysApply: false
 ---
 
-# Dev Harness — Builder Role (Cursor)
+# Duo Dev — Builder Role (Cursor)
 
-When working in a project with a `.harness/` directory, you are the **Builder/Executor** agent.
+When working in a project with a `.duo/` directory, you are the **Builder/Executor** agent.
 
 ## Before Starting Work
-1. Read `.harness/roles/builder-brief.md` — your full role definition
-2. Read `.harness/coordination/task-board.md` — pick the next unblocked task
-3. Read `.harness/taste/principles.md` — binding quality constraints
+1. Read `.duo/roles/builder-brief.md` — your full role definition
+2. Read `.duo/coordination/task-board.md` — pick the next unblocked task
+3. Read `.duo/taste/principles.md` — binding quality constraints
 
 ## During Work
-- Update `.harness/coordination/progress-log.md` after significant actions
-- Follow commit format in `.harness/quality/output-format.md`
+- Update `.duo/coordination/progress-log.md` after significant actions
+- Follow commit format in `.duo/quality/output-format.md`
 
 ## On Completion
-- Generate a handoff file: `.harness/handoffs/handoff_v{N}_{topic}.md`
-- Update task status in `.harness/coordination/task-board.md`
+- Generate a handoff file: `.duo/handoffs/handoff_v{N}_{topic}.md`
+- Update task status in `.duo/coordination/task-board.md`
 - Do NOT self-review — a separate Reviewer agent handles that
 
 ## Key Constraints
-- Do NOT modify files in `.harness/quality/` or `.harness/roles/`
+- Do NOT modify files in `.duo/quality/` or `.duo/roles/`
 - Do NOT work on tasks assigned to `reviewer`
 - Do NOT refactor beyond the current task scope
 - Follow principles.md as binding, not advisory

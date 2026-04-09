@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # loop.sh — Run one full build-review cycle
-# Usage: harness loop [project_dir]
+# Usage: duo loop [project_dir]
 #
 # This runs one iteration of:
 #   1. Builder (Claude Code) executes next task → generates handoff
@@ -12,7 +12,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 TARGET_DIR="${1:-.}"
 TARGET_DIR="$(cd "$TARGET_DIR" && pwd)"
-HARNESS_DIR="${TARGET_DIR}/.harness"
+DUO_DIR="${TARGET_DIR}/.duo"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -20,14 +20,14 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-if [[ ! -d "$HARNESS_DIR" ]]; then
-    echo -e "${RED}Error: No .harness/ found at ${TARGET_DIR}${NC}"
-    echo "Run: harness init ${TARGET_DIR}"
+if [[ ! -d "$DUO_DIR" ]]; then
+    echo -e "${RED}Error: No .duo/ found at ${TARGET_DIR}${NC}"
+    echo "Run: duo init ${TARGET_DIR}"
     exit 1
 fi
 
 echo -e "${BLUE}╔══════════════════════════════════╗${NC}"
-echo -e "${BLUE}║    Dev Harness — Loop Cycle      ║${NC}"
+echo -e "${BLUE}║      Duo Dev — Loop Cycle        ║${NC}"
 echo -e "${BLUE}╚══════════════════════════════════╝${NC}"
 echo ""
 
@@ -41,7 +41,7 @@ echo -e "${YELLOW}Builder phase complete.${NC}"
 read -p "Continue to Review phase? [Y/n] " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Nn]$ ]]; then
-    echo "Paused. Run 'harness review' when ready."
+    echo "Paused. Run 'duo review' when ready."
     exit 0
 fi
 
@@ -58,7 +58,7 @@ echo -e "${BLUE}╚════════════════════�
 echo ""
 
 # Show latest review verdict
-LATEST_REVIEW=$(ls -t "${HARNESS_DIR}/reviews/"review_*.md 2>/dev/null | head -1)
+LATEST_REVIEW=$(ls -t "${DUO_DIR}/reviews/"review_*.md 2>/dev/null | head -1)
 if [[ -n "$LATEST_REVIEW" ]]; then
     VERDICT=$(grep -i "verdict" "$LATEST_REVIEW" | head -1 || echo "Unknown")
     echo -e "Latest review: ${YELLOW}${VERDICT}${NC}"
@@ -68,5 +68,5 @@ fi
 echo ""
 echo -e "${YELLOW}Next steps:${NC}"
 echo "  • If PASS     → Move to next task"
-echo "  • If FAIL     → Run 'harness build' to fix issues"
+echo "  • If FAIL     → Run 'duo build' to fix issues"
 echo "  • If disputed → Edit task-board.md manually, then re-run"

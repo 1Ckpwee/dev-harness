@@ -1,4 +1,4 @@
-# dev-harness
+# duo-dev
 
 A dual-agent workflow that separates **code execution** from **code review** using local CLI tools and the file system as the coordination layer.
 
@@ -21,51 +21,51 @@ AI coding agents are good at executing but bad at self-reviewing. This tool enfo
 - **Reviewer** (Codex) — verifies facts against source, catches errors, grades quality
 - **Human** — sets priorities, resolves disputes, injects taste
 
-Each agent session starts **clean**. All state lives in `.harness/` files — no memory, no context leakage between sessions.
+Each agent session starts **clean**. All state lives in `.duo/` files — no memory, no context leakage between sessions.
 
 ## Install
 
 **One-line install (recommended):**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/1Ckpwee/dev-harness/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/1Ckpwee/duo-dev/main/install.sh | bash
 ```
 
 **Or clone and install:**
 
 ```bash
-git clone https://github.com/1Ckpwee/dev-harness.git
-cd dev-harness
+git clone https://github.com/1Ckpwee/duo-dev.git
+cd duo-dev
 ./install.sh
 ```
 
 This will:
-- Copy templates to `~/.dev-harness/`
+- Copy templates to `~/.duo-dev/`
 - Copy integration configs for Claude Code, Codex, and Cursor
-- Link `harness` CLI to `~/.local/bin/`
-- Add `.harness/` to your global gitignore
+- Link `duo` CLI to `~/.local/bin/`
+- Add `.duo/` to your global gitignore
 - Configure Claude Code, Codex, and Cursor (if installed)
 
 ## Uninstall
 
 ```bash
-harness uninstall
+duo uninstall
 ```
 
-This removes the CLI, `~/.dev-harness/`, and cleans integration configs from Claude Code / Codex / Cursor. Per-project `.harness/` directories are left untouched.
+This removes the CLI, `~/.duo-dev/`, and cleans integration configs from Claude Code / Codex / Cursor. Per-project `.duo/` directories are left untouched.
 
 ## Usage
 
 ### Initialize a project
 
 ```bash
-harness init ~/my-project
+duo init ~/my-project
 ```
 
-This creates a `.harness/` directory (gitignored, never pushed to remote):
+This creates a `.duo/` directory (gitignored, never pushed to remote):
 
 ```
-.harness/
+.duo/
 ├── roles/              # Agent role definitions
 │   ├── builder-brief.md
 │   └── reviewer-brief.md
@@ -87,29 +87,29 @@ This creates a `.harness/` directory (gitignored, never pushed to remote):
 
 ```bash
 # 1. Add tasks to the task board
-vim .harness/coordination/task-board.md
+vim .duo/coordination/task-board.md
 
 # 2. Run the Builder (Claude Code)
-harness build
+duo build
 
 # 3. Run the Reviewer (Codex)
-harness review
+duo review
 
 # Or run both in sequence:
-harness loop
+duo loop
 ```
 
 ### Commands
 
 | Command | Description |
 |---------|-------------|
-| `harness init [dir]` | Bootstrap `.harness/` in a project |
-| `harness build [dir]` | Launch Claude Code as Builder |
-| `harness review [dir]` | Launch Codex as Reviewer |
-| `harness loop [dir]` | One full build → review cycle |
-| `harness status [dir]` | Show current task/handoff/review state |
-| `harness context [dir]` | Auto-generate context-map from codebase |
-| `harness uninstall` | Remove dev-harness from this machine |
+| `duo init [dir]` | Bootstrap `.duo/` in a project |
+| `duo build [dir]` | Launch Claude Code as Builder |
+| `duo review [dir]` | Launch Codex as Reviewer |
+| `duo loop [dir]` | One full build → review cycle |
+| `duo status [dir]` | Show current task/handoff/review state |
+| `duo context [dir]` | Auto-generate context-map from codebase |
+| `duo uninstall` | Remove duo-dev from this machine |
 
 ## How it works
 
@@ -135,7 +135,7 @@ harness loop
 
 ### Taste injection
 
-Edit `.harness/taste/principles.md` to inject your engineering principles. These are treated as **binding constraints**, not suggestions. Both agents grade their work against your principles.
+Edit `.duo/taste/principles.md` to inject your engineering principles. These are treated as **binding constraints**, not suggestions. Both agents grade their work against your principles.
 
 ## Tool support
 
@@ -143,9 +143,9 @@ Edit `.harness/taste/principles.md` to inject your engineering principles. These
 |------|------|------|
 | [Claude Code](https://github.com/anthropics/claude-code) | Builder | `~/.claude/CLAUDE.md` |
 | [Codex](https://github.com/openai/codex) | Reviewer | `~/.codex/AGENTS.md` |
-| [Cursor](https://cursor.com) | Builder (IDE) | `~/.cursor/rules/dev-harness.mdc` |
+| [Cursor](https://cursor.com) | Builder (IDE) | `~/.cursor/rules/duo-dev.mdc` |
 
-You can substitute any coding agent — just have it read the builder/reviewer brief from `.harness/roles/`.
+You can substitute any coding agent — just have it read the builder/reviewer brief from `.duo/roles/`.
 
 ## Principles
 

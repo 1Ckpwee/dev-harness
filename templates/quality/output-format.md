@@ -17,12 +17,12 @@ Types: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`
 
 ### Branch Naming
 ```
-harness/{task_id}-{short-description}
+duo/{task_id}-{short-description}
 ```
 
 ## Handoff Files
 
-Path: `.harness/handoffs/handoff_v{version}_{topic}.md`
+Path: `.duo/handoffs/handoff_v{version}_{topic}.md`
 
 ```markdown
 # Handoff v{N}: {Topic}
@@ -51,7 +51,7 @@ Path: `.harness/handoffs/handoff_v{version}_{topic}.md`
 
 ## Review Files
 
-Path: `.harness/reviews/review_v{version}_{topic}.md`
+Path: `.duo/reviews/review_v{version}_{topic}.md`
 
 ```markdown
 # Review v{N}: {Topic}

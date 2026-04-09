@@ -1,11 +1,11 @@
 # Execution Strategy
 
-> Defines how agents coordinate across sessions. Each session is stateless — all state lives in `.harness/` files.
+> Defines how agents coordinate across sessions. Each session is stateless — all state lives in `.duo/` files.
 
 ## Core Principles
 
 ### 1. Session Isolation
-Every agent session starts **clean** — no memory of previous sessions. Context comes exclusively from `.harness/` files. This prevents context pollution and hallucinated continuity.
+Every agent session starts **clean** — no memory of previous sessions. Context comes exclusively from `.duo/` files. This prevents context pollution and hallucinated continuity.
 
 ### 2. File-Based State Sync
 Agents communicate ONLY through the file system:

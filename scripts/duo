@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+# duo — Main CLI entry point for the duo-dev workflow
+# Usage:
+#   duo init [dir]     — Bootstrap .duo/ in a project
+#   duo build [dir]    — Launch Claude Code as Builder
+#   duo review [dir]   — Launch Codex as Reviewer
+#   duo loop [dir]     — Run one full build→review cycle
+#   duo status [dir]   — Show current duo state
+#   duo context [dir]  — Auto-generate context-map from codebase
+#   duo uninstall      — Remove duo-dev from this machine
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+COMMAND="${1:-help}"
+shift || true
+
+case "$COMMAND" in
+    init)
+        exec "${SCRIPT_DIR}/duo-init.sh" "$@"
+        ;;
+    build)
+        exec "${SCRIPT_DIR}/build.sh" "$@"
+        ;;
+    review)
+        exec "${SCRIPT_DIR}/review.sh" "$@"
+        ;;
+    loop)
+        exec "${SCRIPT_DIR}/loop.sh" "$@"
+        ;;
+    status)
+        TARGET_DIR="${1:-.}"
+        TARGET_DIR="$(cd "$TARGET_DIR" && pwd)"
+        DUO_DIR="${TARGET_DIR}/.duo"
+
+        if [[ ! -d "$DUO_DIR" ]]; then
+            echo "No .duo/ found at ${TARGET_DIR}"
+            exit 1
+        fi
+
+        echo "=== Duo Status ==="
+        echo "Project: $(basename "$TARGET_DIR")"
+        echo ""
+
+        # Count tasks by status
+        if [[ -f "${DUO_DIR}/coordination/task-board.md" ]]; then
+            echo "Tasks:"
+            echo "  Backlog:     $(grep -c '|.*|.*|.*|.*|.*|' "${DUO_DIR}/coordination/task-board.md" 2>/dev/null || echo 0) rows"
+        fi
+
+        # Count handoffs and reviews
+        HANDOFFS=$(ls "${DUO_DIR}/handoffs/"handoff_*.md 2>/dev/null | wc -l | tr -d ' ')
+        REVIEWS=$(ls "${DUO_DIR}/reviews/"review_*.md 2>/dev/null | wc -l | tr -d ' ')
+        echo "  Handoffs:    ${HANDOFFS}"
+        echo "  Reviews:     ${REVIEWS}"
+
+        # Show latest activity
+        echo ""
+        echo "Latest progress:"
+        tail -5 "${DUO_DIR}/coordination/progress-log.md" 2>/dev/null || echo "  (no entries)"
+        ;;
+    context)
+        TARGET_DIR="${1:-.}"
+        TARGET_DIR="$(cd "$TARGET_DIR" && pwd)"
+        DUO_DIR="${TARGET_DIR}/.duo"
+
+        if [[ ! -d "$DUO_DIR" ]]; then
+            echo "No .duo/ found at ${TARGET_DIR}. Run: duo init"
+            exit 1
+        fi
+
+        PROMPT="Read the codebase and generate a comprehensive context-map.
+Write the result to .duo/coordination/context-map.md using the existing template format.
+Include: directory structure, key modules, critical paths, conventions, and external dependencies.
+Be factual — only document what actually exists in the code."
+
+        echo "=== Generating Context Map (Claude Code) ==="
+        cd "$TARGET_DIR" && claude --print "$PROMPT" > /dev/null
+        echo "Done. See: .duo/coordination/context-map.md"
+        ;;
+    uninstall)
+        DUO_HOME="${HOME}/.duo-dev"
+        if [[ -f "${DUO_HOME}/scripts/uninstall.sh" ]]; then
+            exec "${DUO_HOME}/scripts/uninstall.sh"
+        else
+            echo "Error: uninstall.sh not found. Reinstall duo-dev first."
+            exit 1
+        fi
+        ;;
+    help|--help|-h)
+        echo "duo — Dual-agent development workflow"
+        echo ""
+        echo "Usage: duo <command> [project_dir]"
+        echo ""
+        echo "Commands:"
+        echo "  init      Bootstrap .duo/ in a project"
+        echo "  build     Launch Claude Code as Builder agent"
+        echo "  review    Launch Codex as Reviewer agent"
+        echo "  loop      Run one full build→review cycle"
+        echo "  status    Show current duo state"
+        echo "  context   Auto-generate context-map from codebase"
+        echo "  uninstall Remove duo-dev from this machine"
+        echo ""
+        echo "Workflow:"
+        echo "  1. duo init ~/my-project"
+        echo "  2. Edit .duo/coordination/task-board.md"
+        echo "  3. duo build  (or duo loop for full cycle)"
+        ;;
+    *)
+        echo "Unknown command: $COMMAND"
+        echo "Run 'duo help' for usage."
+        exit 1
+        ;;
+esac

@@ -5,11 +5,11 @@ You are the **Builder/Executor**. Your job is to explore source code, draft cont
 
 ## Entry Protocol
 Before starting any work, read these files in order:
-1. `.harness/coordination/task-board.md` — pick the next unblocked task assigned to `builder`
-2. `.harness/coordination/context-map.md` — understand the codebase topology
-3. `.harness/coordination/progress-log.md` — know what's already been done
-4. `.harness/taste/principles.md` — align with the human's quality standards
-5. `.harness/quality/output-format.md` — know the expected output shape
+1. `.duo/coordination/task-board.md` — pick the next unblocked task assigned to `builder`
+2. `.duo/coordination/context-map.md` — understand the codebase topology
+3. `.duo/coordination/progress-log.md` — know what's already been done
+4. `.duo/taste/principles.md` — align with the human's quality standards
+5. `.duo/quality/output-format.md` — know the expected output shape
 
 ## Core Responsibilities
 - **Source exploration**: Read, grep, and map relevant code paths
@@ -21,14 +21,14 @@ Before starting any work, read these files in order:
 
 ### During Execution
 - Commit early and often with descriptive messages
-- Update `.harness/coordination/progress-log.md` after each significant action
-- Update `.harness/coordination/task-board.md` to reflect task status changes
+- Update `.duo/coordination/progress-log.md` after each significant action
+- Update `.duo/coordination/task-board.md` to reflect task status changes
 
 ### On Completion — Handoff File
 When you finish a task or batch of tasks, generate:
 
 ```
-.harness/handoffs/handoff_v{N}_{topic}.md
+.duo/handoffs/handoff_v{N}_{topic}.md
 ```
 
 The handoff file MUST contain:
@@ -40,7 +40,7 @@ The handoff file MUST contain:
 
 ### What NOT To Do
 - Do NOT self-review or claim your work is correct
-- Do NOT modify `.harness/quality/review-checklist.md`
+- Do NOT modify `.duo/quality/review-checklist.md`
 - Do NOT skip the handoff file — it is mandatory
 - Do NOT work on tasks marked `blocked` or assigned to `reviewer`
 - Do NOT refactor code beyond the scope of the current task

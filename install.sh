@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# install.sh — Install dev-harness globally
+# install.sh — Install duo-dev globally
 # Usage: ./install.sh
-#        curl -fsSL https://raw.githubusercontent.com/1Ckpwee/dev-harness/main/install.sh | bash
+#        curl -fsSL https://raw.githubusercontent.com/1Ckpwee/duo-dev/main/install.sh | bash
 
 set -euo pipefail
 
@@ -11,9 +11,9 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m'
 
-HARNESS_HOME="${HOME}/.dev-harness"
+DUO_HOME="${HOME}/.duo-dev"
 BIN_DIR="${HOME}/.local/bin"
-REPO_URL="https://github.com/1Ckpwee/dev-harness.git"
+REPO_URL="https://github.com/1Ckpwee/duo-dev.git"
 
 # Detect if running from a cloned repo or via curl pipe
 detect_source() {
@@ -34,7 +34,7 @@ detect_source() {
 SOURCE=$(detect_source)
 
 if [[ "$SOURCE" == "remote" ]]; then
-    echo -e "${BLUE}=== Installing Dev Harness (remote) ===${NC}"
+    echo -e "${BLUE}=== Installing Duo Dev (remote) ===${NC}"
 
     # Check git is available
     if ! command -v git &>/dev/null; then
@@ -45,34 +45,34 @@ if [[ "$SOURCE" == "remote" ]]; then
     TMPDIR=$(mktemp -d)
     trap 'rm -rf "$TMPDIR"' EXIT
 
-    echo -e "${GREEN}Cloning dev-harness...${NC}"
+    echo -e "${GREEN}Cloning duo-dev...${NC}"
     git clone --depth 1 --quiet "$REPO_URL" "$TMPDIR"
     REPO_DIR="$TMPDIR"
 else
     REPO_DIR="${SOURCE#local:}"
-    echo -e "${BLUE}=== Installing Dev Harness (local) ===${NC}"
+    echo -e "${BLUE}=== Installing Duo Dev (local) ===${NC}"
 fi
 
 # Copy templates
-mkdir -p "$HARNESS_HOME"
-cp -r "${REPO_DIR}/templates" "$HARNESS_HOME/"
-echo -e "${GREEN}Templates installed to ${HARNESS_HOME}/templates${NC}"
+mkdir -p "$DUO_HOME"
+cp -r "${REPO_DIR}/templates" "$DUO_HOME/"
+echo -e "${GREEN}Templates installed to ${DUO_HOME}/templates${NC}"
 
 # Copy scripts
-mkdir -p "$HARNESS_HOME/scripts"
-cp "${REPO_DIR}/scripts/"* "$HARNESS_HOME/scripts/"
-chmod +x "$HARNESS_HOME/scripts/"*
-echo -e "${GREEN}Scripts installed to ${HARNESS_HOME}/scripts${NC}"
+mkdir -p "$DUO_HOME/scripts"
+cp "${REPO_DIR}/scripts/"* "$DUO_HOME/scripts/"
+chmod +x "$DUO_HOME/scripts/"*
+echo -e "${GREEN}Scripts installed to ${DUO_HOME}/scripts${NC}"
 
 # Copy integrations
-mkdir -p "$HARNESS_HOME/integrations"
-cp "${REPO_DIR}/integrations/"* "$HARNESS_HOME/integrations/"
-echo -e "${GREEN}Integrations installed to ${HARNESS_HOME}/integrations${NC}"
+mkdir -p "$DUO_HOME/integrations"
+cp "${REPO_DIR}/integrations/"* "$DUO_HOME/integrations/"
+echo -e "${GREEN}Integrations installed to ${DUO_HOME}/integrations${NC}"
 
-# Symlink harness CLI to PATH
+# Symlink duo CLI to PATH
 mkdir -p "$BIN_DIR"
-ln -sf "$HARNESS_HOME/scripts/harness" "$BIN_DIR/harness"
-echo -e "${GREEN}CLI linked to ${BIN_DIR}/harness${NC}"
+ln -sf "$DUO_HOME/scripts/duo" "$BIN_DIR/duo"
+echo -e "${GREEN}CLI linked to ${BIN_DIR}/duo${NC}"
 
 # Check PATH
 if ! echo "$PATH" | tr ':' '\n' | grep -q "${BIN_DIR}"; then
@@ -81,28 +81,28 @@ if ! echo "$PATH" | tr ':' '\n' | grep -q "${BIN_DIR}"; then
     echo "  export PATH=\"\${HOME}/.local/bin:\${PATH}\""
 fi
 
-# Add .harness/ to global gitignore
+# Add .duo/ to global gitignore
 GLOBAL_GITIGNORE="${HOME}/.config/git/ignore"
 mkdir -p "$(dirname "$GLOBAL_GITIGNORE")"
 if [[ -f "$GLOBAL_GITIGNORE" ]]; then
-    if ! grep -q '\.harness/' "$GLOBAL_GITIGNORE" 2>/dev/null; then
+    if ! grep -q '\.duo/' "$GLOBAL_GITIGNORE" 2>/dev/null; then
         echo "" >> "$GLOBAL_GITIGNORE"
-        echo "# Dev Harness (local only)" >> "$GLOBAL_GITIGNORE"
-        echo ".harness/" >> "$GLOBAL_GITIGNORE"
+        echo "# Duo Dev (local only)" >> "$GLOBAL_GITIGNORE"
+        echo ".duo/" >> "$GLOBAL_GITIGNORE"
     fi
 else
-    printf '# Dev Harness (local only)\n.harness/\n' > "$GLOBAL_GITIGNORE"
+    printf '# Duo Dev (local only)\n.duo/\n' > "$GLOBAL_GITIGNORE"
 fi
 git config --global core.excludesfile "$GLOBAL_GITIGNORE"
-echo -e "${GREEN}.harness/ added to global gitignore${NC}"
+echo -e "${GREEN}.duo/ added to global gitignore${NC}"
 
 # Install Claude Code integration
 CLAUDE_MD="${HOME}/.claude/CLAUDE.md"
 if [[ -d "${HOME}/.claude" ]]; then
     if [[ -f "$CLAUDE_MD" ]]; then
-        if ! grep -q "Dev Harness" "$CLAUDE_MD" 2>/dev/null; then
+        if ! grep -q "Duo Dev" "$CLAUDE_MD" 2>/dev/null; then
             echo "" >> "$CLAUDE_MD"
-            cat "${HARNESS_HOME}/integrations/claude-code.md" >> "$CLAUDE_MD"
+            cat "${DUO_HOME}/integrations/claude-code.md" >> "$CLAUDE_MD"
             echo -e "${GREEN}Claude Code config updated${NC}"
         fi
     fi
@@ -113,9 +113,9 @@ fi
 # Install Codex integration
 CODEX_AGENTS="${HOME}/.codex/AGENTS.md"
 if [[ -d "${HOME}/.codex" ]]; then
-    if ! grep -q "Dev Harness" "$CODEX_AGENTS" 2>/dev/null; then
+    if ! grep -q "Duo Dev" "$CODEX_AGENTS" 2>/dev/null; then
         echo "" >> "$CODEX_AGENTS"
-        cat "${HARNESS_HOME}/integrations/codex-agents.md" >> "$CODEX_AGENTS"
+        cat "${DUO_HOME}/integrations/codex-agents.md" >> "$CODEX_AGENTS"
         echo -e "${GREEN}Codex config updated${NC}"
     fi
 else
@@ -126,8 +126,8 @@ fi
 CURSOR_RULES="${HOME}/.cursor/rules"
 if [[ -d "${HOME}/.cursor" ]]; then
     mkdir -p "$CURSOR_RULES"
-    if [[ ! -f "${CURSOR_RULES}/dev-harness.mdc" ]]; then
-        cp "${HARNESS_HOME}/integrations/cursor-rule.mdc" "${CURSOR_RULES}/dev-harness.mdc" 2>/dev/null || true
+    if [[ ! -f "${CURSOR_RULES}/duo-dev.mdc" ]]; then
+        cp "${DUO_HOME}/integrations/cursor-rule.mdc" "${CURSOR_RULES}/duo-dev.mdc" 2>/dev/null || true
         echo -e "${GREEN}Cursor rules installed${NC}"
     fi
 else
@@ -138,9 +138,9 @@ echo ""
 echo -e "${BLUE}=== Installation Complete ===${NC}"
 echo ""
 echo "Usage:"
-echo "  harness init ~/my-project    # Initialize a project"
+echo "  duo init ~/my-project    # Initialize a project"
 echo "  cd ~/my-project"
-echo "  harness build                # Run Claude Code as Builder"
-echo "  harness review               # Run Codex as Reviewer"
-echo "  harness loop                 # Full build→review cycle"
-echo "  harness uninstall            # Remove dev-harness"
+echo "  duo build                # Run Claude Code as Builder"
+echo "  duo review               # Run Codex as Reviewer"
+echo "  duo loop                 # Full build→review cycle"
+echo "  duo uninstall            # Remove duo-dev"
