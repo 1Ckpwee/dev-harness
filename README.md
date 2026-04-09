@@ -25,6 +25,14 @@ Each agent session starts **clean**. All state lives in `.harness/` files — no
 
 ## Install
 
+**One-line install (recommended):**
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/1Ckpwee/dev-harness/main/install.sh | bash
+```
+
+**Or clone and install:**
+
 ```bash
 git clone https://github.com/1Ckpwee/dev-harness.git
 cd dev-harness
@@ -33,9 +41,18 @@ cd dev-harness
 
 This will:
 - Copy templates to `~/.dev-harness/`
+- Copy integration configs for Claude Code, Codex, and Cursor
 - Link `harness` CLI to `~/.local/bin/`
 - Add `.harness/` to your global gitignore
 - Configure Claude Code, Codex, and Cursor (if installed)
+
+## Uninstall
+
+```bash
+harness uninstall
+```
+
+This removes the CLI, `~/.dev-harness/`, and cleans integration configs from Claude Code / Codex / Cursor. Per-project `.harness/` directories are left untouched.
 
 ## Usage
 
@@ -92,6 +109,7 @@ harness loop
 | `harness loop [dir]` | One full build → review cycle |
 | `harness status [dir]` | Show current task/handoff/review state |
 | `harness context [dir]` | Auto-generate context-map from codebase |
+| `harness uninstall` | Remove dev-harness from this machine |
 
 ## How it works
 

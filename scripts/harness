@@ -77,6 +77,15 @@ Be factual — only document what actually exists in the code."
         cd "$TARGET_DIR" && claude --print "$PROMPT" > /dev/null
         echo "Done. See: .harness/coordination/context-map.md"
         ;;
+    uninstall)
+        HARNESS_HOME="${HOME}/.dev-harness"
+        if [[ -f "${HARNESS_HOME}/scripts/uninstall.sh" ]]; then
+            exec "${HARNESS_HOME}/scripts/uninstall.sh"
+        else
+            echo "Error: uninstall.sh not found. Reinstall dev-harness first."
+            exit 1
+        fi
+        ;;
     help|--help|-h)
         echo "harness — Dual-agent development workflow"
         echo ""
@@ -89,6 +98,7 @@ Be factual — only document what actually exists in the code."
         echo "  loop      Run one full build→review cycle"
         echo "  status    Show current harness state"
         echo "  context   Auto-generate context-map from codebase"
+        echo "  uninstall Remove dev-harness from this machine"
         echo ""
         echo "Workflow:"
         echo "  1. harness init ~/my-project"

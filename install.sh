@@ -5,16 +5,53 @@
 
 set -euo pipefail
 
-REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
-HARNESS_HOME="${HOME}/.dev-harness"
-BIN_DIR="${HOME}/.local/bin"
-
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
+RED='\033[0;31m'
 NC='\033[0m'
 
-echo -e "${BLUE}=== Installing Dev Harness ===${NC}"
+HARNESS_HOME="${HOME}/.dev-harness"
+BIN_DIR="${HOME}/.local/bin"
+REPO_URL="https://github.com/1Ckpwee/dev-harness.git"
+
+# Detect if running from a cloned repo or via curl pipe
+detect_source() {
+    local script_dir
+    # When piped from curl, $0 is "bash" and BASH_SOURCE is unset/empty
+    if [[ -z "${BASH_SOURCE[0]:-}" ]] || [[ "${BASH_SOURCE[0]}" == "bash" ]]; then
+        echo "remote"
+    else
+        script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+        if [[ -d "${script_dir}/templates" && -d "${script_dir}/scripts" ]]; then
+            echo "local:${script_dir}"
+        else
+            echo "remote"
+        fi
+    fi
+}
+
+SOURCE=$(detect_source)
+
+if [[ "$SOURCE" == "remote" ]]; then
+    echo -e "${BLUE}=== Installing Dev Harness (remote) ===${NC}"
+
+    # Check git is available
+    if ! command -v git &>/dev/null; then
+        echo -e "${RED}Error: git is required but not installed.${NC}"
+        exit 1
+    fi
+
+    TMPDIR=$(mktemp -d)
+    trap 'rm -rf "$TMPDIR"' EXIT
+
+    echo -e "${GREEN}Cloning dev-harness...${NC}"
+    git clone --depth 1 --quiet "$REPO_URL" "$TMPDIR"
+    REPO_DIR="$TMPDIR"
+else
+    REPO_DIR="${SOURCE#local:}"
+    echo -e "${BLUE}=== Installing Dev Harness (local) ===${NC}"
+fi
 
 # Copy templates
 mkdir -p "$HARNESS_HOME"
@@ -26,6 +63,11 @@ mkdir -p "$HARNESS_HOME/scripts"
 cp "${REPO_DIR}/scripts/"* "$HARNESS_HOME/scripts/"
 chmod +x "$HARNESS_HOME/scripts/"*
 echo -e "${GREEN}Scripts installed to ${HARNESS_HOME}/scripts${NC}"
+
+# Copy integrations
+mkdir -p "$HARNESS_HOME/integrations"
+cp "${REPO_DIR}/integrations/"* "$HARNESS_HOME/integrations/"
+echo -e "${GREEN}Integrations installed to ${HARNESS_HOME}/integrations${NC}"
 
 # Symlink harness CLI to PATH
 mkdir -p "$BIN_DIR"
@@ -59,27 +101,8 @@ CLAUDE_MD="${HOME}/.claude/CLAUDE.md"
 if [[ -d "${HOME}/.claude" ]]; then
     if [[ -f "$CLAUDE_MD" ]]; then
         if ! grep -q "Dev Harness" "$CLAUDE_MD" 2>/dev/null; then
-            cat >> "$CLAUDE_MD" << 'EOF'
-
-## Dev Harness Workflow
-When a project contains a `.harness/` directory, this project uses the dual-agent workflow:
-- **Claude Code** = Builder agent (executes tasks, writes code, generates handoffs)
-- **Codex** = Reviewer agent (reviews handoffs, grades quality, catches errors)
-- **Cursor** = IDE-integrated Builder (same role as Claude Code, different interface)
-
-### Builder Mode (when you see `.harness/`)
-1. Read `.harness/roles/builder-brief.md` for your full role definition
-2. Pick tasks from `.harness/coordination/task-board.md`
-3. Follow `.harness/taste/principles.md` as binding constraints
-4. Generate handoff files in `.harness/handoffs/` when completing work
-5. Update `progress-log.md` and `task-board.md` after every significant action
-
-### CLI Shortcut
-- `harness init <dir>` — bootstrap .harness/ in any project
-- `harness build` — launch Claude Code as Builder
-- `harness review` — launch Codex as Reviewer
-- `harness loop` — run one full build→review cycle
-EOF
+            echo "" >> "$CLAUDE_MD"
+            cat "${HARNESS_HOME}/integrations/claude-code.md" >> "$CLAUDE_MD"
             echo -e "${GREEN}Claude Code config updated${NC}"
         fi
     fi
@@ -91,19 +114,8 @@ fi
 CODEX_AGENTS="${HOME}/.codex/AGENTS.md"
 if [[ -d "${HOME}/.codex" ]]; then
     if ! grep -q "Dev Harness" "$CODEX_AGENTS" 2>/dev/null; then
-        cat >> "$CODEX_AGENTS" << 'EOF'
-
-## Dev Harness Workflow
-When a project contains a `.harness/` directory, you are the **Reviewer/Architect** agent in a dual-agent workflow.
-
-### Reviewer Mode (when you see `.harness/`)
-1. Read `.harness/roles/reviewer-brief.md` for your full role definition
-2. Find the latest handoff file in `.harness/handoffs/`
-3. Grade against `.harness/quality/review-checklist.md`
-4. Follow `.harness/taste/principles.md` as the human's binding quality standards
-5. Output review files to `.harness/reviews/`
-6. Update `progress-log.md` and `task-board.md` with your findings
-EOF
+        echo "" >> "$CODEX_AGENTS"
+        cat "${HARNESS_HOME}/integrations/codex-agents.md" >> "$CODEX_AGENTS"
         echo -e "${GREEN}Codex config updated${NC}"
     fi
 else
@@ -115,7 +127,7 @@ CURSOR_RULES="${HOME}/.cursor/rules"
 if [[ -d "${HOME}/.cursor" ]]; then
     mkdir -p "$CURSOR_RULES"
     if [[ ! -f "${CURSOR_RULES}/dev-harness.mdc" ]]; then
-        cp "${REPO_DIR}/integrations/cursor-rule.mdc" "${CURSOR_RULES}/dev-harness.mdc" 2>/dev/null || true
+        cp "${HARNESS_HOME}/integrations/cursor-rule.mdc" "${CURSOR_RULES}/dev-harness.mdc" 2>/dev/null || true
         echo -e "${GREEN}Cursor rules installed${NC}"
     fi
 else
@@ -131,3 +143,4 @@ echo "  cd ~/my-project"
 echo "  harness build                # Run Claude Code as Builder"
 echo "  harness review               # Run Codex as Reviewer"
 echo "  harness loop                 # Full build→review cycle"
+echo "  harness uninstall            # Remove dev-harness"
