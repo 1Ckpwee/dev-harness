@@ -68,7 +68,9 @@ This creates a `.duo/` directory (gitignored, never pushed to remote):
 .duo/
 ├── roles/              # Agent role definitions
 │   ├── builder-brief.md
-│   └── reviewer-brief.md
+│   ├── reviewer-brief.md
+│   ├── planner-brief.md
+│   └── orchestrator-brief.md
 ├── coordination/       # Shared state
 │   ├── context-map.md      # Codebase topology
 │   ├── task-board.md       # Task queue with priorities
@@ -79,24 +81,29 @@ This creates a `.duo/` directory (gitignored, never pushed to remote):
 │   └── output-format.md
 ├── taste/              # Your engineering principles
 │   └── principles.md
+├── plans/              # Generated plans (from duo plan)
 ├── handoffs/           # Builder → Reviewer
 └── reviews/            # Reviewer → Builder
 ```
 
-### Daily workflow
+### Three-agent workflow
 
 ```bash
-# 1. Add tasks to the task board
-vim .duo/coordination/task-board.md
+# 1. Inject your taste
+vim .duo/taste/principles.md
 
-# 2. Run the Builder (Claude Code)
+# 2. Generate a plan from intent
+duo plan "Implement user login feature"
+
+# 3. Execute plan (Builder + Reviewer loop)
+duo loop
+# Or step by step:
 duo build
-
-# 3. Run the Reviewer (Codex)
 duo review
 
-# Or run both in sequence:
-duo loop
+# Use --yes to skip confirmations (CI mode)
+duo plan "Implement user login feature" --yes
+duo loop --yes
 ```
 
 ### Commands
@@ -104,6 +111,7 @@ duo loop
 | Command | Description |
 |---------|-------------|
 | `duo init [dir]` | Bootstrap `.duo/` in a project |
+| `duo plan "intent"` | Generate plan from user intent |
 | `duo build [dir]` | Launch Claude Code as Builder |
 | `duo review [dir]` | Launch Codex as Reviewer |
 | `duo loop [dir]` | One full build → review cycle |
@@ -113,16 +121,23 @@ duo loop
 
 ## How it works
 
+### The three roles
+
+- **Planner** — translates user intent into a concrete plan with acceptance criteria
+- **Builder** (Claude Code / Cursor) — executes tasks against the plan
+- **Reviewer** (Codex) — verifies against plan's acceptance criteria, catches errors
+
 ### The cycle
 
-1. **You** write tasks in `task-board.md`
-2. **Builder** picks the next task, executes it, generates a `handoff_v{N}_{topic}.md`
-3. **Reviewer** reads the handoff + actual source code, outputs a `review_v{N}_{topic}.md`
-4. Review verdict:
-   - **PASS** → move to next task
+1. **You** describe intent: `duo plan "Implement login feature"`
+2. **Planner** generates `.duo/plans/plan.md` with task breakdown + acceptance criteria
+3. **Builder** reads plan.md, executes current task, generates a `handoff_*.md`
+4. **Reviewer** grades against plan.md acceptance criteria, outputs `review_*.md`
+5. Review verdict:
+   - **PASS** → next task or commit
    - **PASS_WITH_NOTES** → minor issues noted, your call
-   - **FAIL** → P1 blocker found, Builder must fix in next session
-5. **You** intervene at any point to adjust scope or resolve disputes
+   - **FAIL** → P1 blocker, Builder must fix in next session
+6. **You** intervene at any point to adjust scope or resolve disputes
 
 ### Review severity
 
