@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 # duo — Main CLI entry point for the duo-dev workflow
 # Usage:
-#   duo init [dir]     — Bootstrap .duo/ in a project
-#   duo build [dir]    — Launch Claude Code as Builder
-#   duo review [dir]   — Launch Codex as Reviewer
-#   duo loop [dir]     — Run one full build→review cycle
-#   duo status [dir]   — Show current duo state
-#   duo context [dir]  — Auto-generate context-map from codebase
-#   duo uninstall      — Remove duo-dev from this machine
+#   duo init [dir]       — Bootstrap .duo/ in a project
+#   duo plan "intent"    — Generate plan from user intent
+#   duo build [dir]      — Launch Claude Code as Builder
+#   duo review [dir]      — Launch Codex as Reviewer
+#   duo loop [dir]       — Run one full build→review cycle
+#   duo status [dir]     — Show current duo state
+#   duo context [dir]    — Auto-generate context-map from codebase
+#   duo uninstall        — Remove duo-dev from this machine
 
 set -euo pipefail
 
@@ -18,6 +19,9 @@ shift || true
 case "$COMMAND" in
     init)
         exec "${SCRIPT_DIR}/duo-init.sh" "$@"
+        ;;
+    plan)
+        exec "${SCRIPT_DIR}/plan.sh" "$@"
         ;;
     build)
         exec "${SCRIPT_DIR}/build.sh" "$@"
@@ -94,6 +98,7 @@ Be factual — only document what actually exists in the code."
         echo ""
         echo "Commands:"
         echo "  init      Bootstrap .duo/ in a project"
+        echo "  plan      Generate plan from user intent (duo plan \"任务描述\")"
         echo "  build     Launch Claude Code as Builder agent"
         echo "  review    Launch Codex as Reviewer agent"
         echo "  loop      Run one full build→review cycle"
@@ -103,8 +108,10 @@ Be factual — only document what actually exists in the code."
         echo ""
         echo "Workflow:"
         echo "  1. duo init ~/my-project"
-        echo "  2. Edit .duo/coordination/task-board.md"
-        echo "  3. duo build  (or duo loop for full cycle)"
+        echo "  2. duo plan \"实现登录功能\""
+        echo "  3. duo loop (or duo build + duo review separately)"
+        echo ""
+        echo "Use --yes flag to skip confirmations (CI mode)"
         ;;
     *)
         echo "Unknown command: $COMMAND"

@@ -73,22 +73,22 @@ echo -e "${BLUE}╚════════════════════�
 echo ""
 
 # Phase 1: Build (non-interactive, skip permissions)
-confirm "Builder (Claude Code)" "Execute next task from task board"
+confirm "Builder (Claude Code)" "Execute next task from plan.md"
 echo -e "${GREEN}▶ Phase 1: Builder (Claude Code)${NC}"
 echo "───────────────────────────────────"
 cd "$TARGET_DIR" && claude -p --dangerously-skip-permissions \
-    "You are the Builder agent. START by reading: .duo/roles/builder-brief.md, .duo/coordination/task-board.md, .duo/coordination/progress-log.md, .duo/taste/principles.md, .duo/quality/output-format.md. Pick the next unblocked task and execute it. Generate a handoff file in .duo/handoffs/. Update task-board.md and progress-log.md before finishing."
+    "You are the Builder agent. START by reading: .duo/roles/builder-brief.md, .duo/plans/plan.md, .duo/coordination/progress-log.md, .duo/taste/principles.md, .duo/quality/output-format.md. Pick the next incomplete task from plan.md and execute it. Generate a handoff file in .duo/handoffs/. Update progress-log.md before finishing."
 
 echo ""
 echo -e "${BLUE}✓ Builder phase complete${NC}"
 
 # Phase 2: Review (non-interactive, full auto)
-confirm "Reviewer (Codex)" "Review Builder's handoff"
+confirm "Reviewer (Codex)" "Review Builder's handoff against plan.md"
 echo ""
 echo -e "${GREEN}▶ Phase 2: Reviewer (Codex)${NC}"
 echo "───────────────────────────────────"
 cd "$TARGET_DIR" && codex -q --full-auto \
-    "You are the Reviewer agent. START by reading: .duo/roles/reviewer-brief.md, .duo/quality/review-checklist.md, .duo/taste/principles.md. Read the latest handoff in .duo/handoffs/. Verify code against source. Generate a structured review in .duo/reviews/. Output verdict as: PASS | PASS_WITH_NOTES | FAIL with issues. Update task-board.md and progress-log.md."
+    "You are the Reviewer agent. START by reading: .duo/roles/reviewer-brief.md, .duo/plans/plan.md (acceptance criteria), .duo/quality/review-checklist.md, .duo/taste/principles.md. Read the latest handoff in .duo/handoffs/. Verify code against source. Grade against the acceptance criteria in plan.md. Generate a structured review in .duo/reviews/. Output verdict as: PASS | PASS_WITH_NOTES | FAIL with issues. Update progress-log.md."
 
 echo ""
 echo -e "${BLUE}✓ Reviewer phase complete${NC}"
